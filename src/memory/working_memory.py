@@ -81,6 +81,7 @@ class WorkingMemory:
 
     def set_task_graph(self, task_nodes: List[TaskNode]) -> None:
         self.tasks.clear()
+        self.db.clear_tasks_for_session(self.session_id)
         for node in task_nodes:
             self.tasks[node.id] = node
             self.db.add_task(

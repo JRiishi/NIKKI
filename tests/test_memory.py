@@ -76,6 +76,28 @@ class TestMemorySystem(unittest.TestCase):
         self.assertIn("HIGH-LEVEL GOAL", ctx)
         self.assertIn("write_file", ctx)
 
+    def test_04_multiple_set_task_graph_no_conflict(self):
+        """Verify calling set_task_graph multiple times in same session does not raise IntegrityError."""
+        wm = WorkingMemory(self.db, session_id="test_sess_03")
+        wm.initialize_session("Multi-run session")
+
+        # First run
+        t1 = TaskNode(id="task_1", title="First run t1", dependencies=[])
+        t2 = TaskNode(id="task_2", title="First run t2", dependencies=["task_1"])
+        wm.set_task_graph([t1, t2])
+        self.assertEqual(len(wm.tasks), 2)
+
+        # Second run with same task IDs in same session (must upsert / clear cleanly)
+        t1_new = TaskNode(id="task_1", title="Second run t1 updated", dependencies=[])
+        t2_new = TaskNode(id="task_2", title="Second run t2 updated", dependencies=["task_1"])
+        t3_new = TaskNode(id="task_3", title="Second run t3 new", dependencies=["task_2"])
+        wm.set_task_graph([t1_new, t2_new, t3_new])
+        self.assertEqual(len(wm.tasks), 3)
+
+        tasks_in_db = self.db.get_tasks_for_session("test_sess_03")
+        self.assertEqual(len(tasks_in_db), 3)
+        self.assertEqual(tasks_in_db[0]["title"], "Second run t1 updated")
+
 if __name__ == "__main__":
     unittest.main()
 

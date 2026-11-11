@@ -134,9 +134,22 @@ class StateDatabase:
         with self._connection() as conn:
             conn.execute(
                 """INSERT INTO tasks (id, session_id, title, description, dependencies, assigned_to, status, inputs)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                   ON CONFLICT(session_id, id) DO UPDATE SET
+                       title = excluded.title,
+                       description = excluded.description,
+                       dependencies = excluded.dependencies,
+                       assigned_to = excluded.assigned_to,
+                       status = excluded.status,
+                       inputs = excluded.inputs,
+                       updated_at = CURRENT_TIMESTAMP""",
                 (task_id, session_id, title, description, json.dumps(dependencies or []), assigned_to, status, json.dumps(inputs or {}))
             )
+
+    def clear_tasks_for_session(self, session_id: str) -> None:
+        """Delete all tasks associated with a session before setting a new task graph."""
+        with self._connection() as conn:
+            conn.execute("DELETE FROM tasks WHERE session_id = ?", (session_id,))
 
     def update_task_status(
         self,
