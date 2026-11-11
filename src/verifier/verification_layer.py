@@ -76,15 +76,21 @@ class VerificationLayer:
         diff_res = self.tools.execute("git_diff")
         diff_text = diff_res.output.get("diff", "") if diff_res.success and diff_res.output else ""
         if not diff_text:
-            # Check latest git commit or unstaged status
             status_res = self.tools.execute("git_status")
             diff_text = f"Workspace Git Status:\n{status_res.output}"
-            # Also check if files like src/string_utils.py exist and read content
-            import glob
-            py_files = list(Path("src").glob("*.py"))
-            for pf in py_files:
-                if pf.name != "__init__.py":
-                    diff_text += f"\n\nFile [{pf.as_posix()}]:\n{pf.read_text(encoding='utf-8', errors='ignore')}"
+            # Scan ALL python files modified/added in the workspace, not just src/
+            import glob as _glob
+            all_py_files = list(Path(".").rglob("*.py"))
+            # Exclude venv, pycache, benchmark internals
+            skip_dirs = {"__pycache__", ".venv", "venv", "benchmarks"}
+            for pf in all_py_files:
+                if any(part in skip_dirs for part in pf.parts):
+                    continue
+                if pf.stat().st_size < 50_000:  # skip very large generated files
+                    try:
+                        diff_text += f"\n\nFile [{pf.as_posix()}]:\n{pf.read_text(encoding='utf-8', errors='ignore')}"
+                    except Exception:
+                        pass
 
         # 3. Cognitive Review with Qwen 9B
         review_prompt = f"""User Objective:

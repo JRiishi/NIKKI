@@ -118,6 +118,9 @@ class AgentOrchestrator:
                 retries = task_retry_counts.get(task.id, 0)
                 if retries < self.max_retries:
                     task_retry_counts[task.id] = retries + 1
+                    # On first retry, escalate to coder_worker_9b regardless of original routing
+                    if retries == 0 and assigned_worker_key != "coder_worker_9b":
+                        task.assigned_to = "coder_worker_9b"
                     wm.update_task_status(task.id, status="PENDING", error=exec_result.error)
                 else:
                     wm.update_task_status(task.id, status="FAILED", error=exec_result.error)

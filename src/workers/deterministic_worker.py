@@ -45,8 +45,12 @@ class DeterministicWorker(BaseWorker):
             res = self.tools.execute("git_status", task_id=task.id)
             return WorkerResult(success=res.success, output=res.output, error=res.error, tool_calls_made=tool_calls, worker_name=self.name)
 
-        # Default fallback: file listing
-        tool_calls += 1
-        res = self.tools.execute("list_dir", task_id=task.id, path=".")
-        return WorkerResult(success=res.success, output=res.output, error=res.error, tool_calls_made=tool_calls, worker_name=self.name)
+        # Default fallback: DeterministicWorker received a task it cannot execute deterministically.
+        # Return failure so orchestrator retries with coder_worker_9b via re-route.
+        return WorkerResult(
+            success=False,
+            error=f"DeterministicWorker cannot execute task '{task.title}' — no deterministic handler matched. Task should be re-routed to coder_worker_9b.",
+            tool_calls_made=tool_calls,
+            worker_name=self.name
+        )
 
