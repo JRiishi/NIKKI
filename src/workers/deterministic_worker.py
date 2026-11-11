@@ -17,10 +17,15 @@ class DeterministicWorker(BaseWorker):
         lower = (task.title + " " + task.description).lower()
         tool_calls = 0
 
-        # Case 1: Run tests
-        if "run test" in lower or "pytest" in lower or "unittest" in lower:
+        # Case 1: Run tests (only when explicitly requested to execute/run tests)
+        is_explicit_test_run = any(kw in lower for kw in ["run test", "execute test", "run pytest", "run unittest", "verify test"])
+        is_file_creation = any(kw in lower for kw in ["create", "write", "implement", "scaffold", "generate"])
+
+        if is_explicit_test_run and not is_file_creation:
+            # Extract target test file if specified
+            test_target = task.inputs.get("test_target") or task.inputs.get("file_path")
             tool_calls += 1
-            res = self.tools.execute("run_tests", task_id=task.id)
+            res = self.tools.execute("run_tests", task_id=task.id, test_target=test_target)
             if res.success:
                 return WorkerResult(success=True, output=res.output, tool_calls_made=tool_calls, worker_name=self.name)
             else:

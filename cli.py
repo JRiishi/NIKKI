@@ -89,6 +89,14 @@ def run_interactive_chat(service: LocalModelService, session_id: str = None):
 
             result = orchestrator.run(approved_goal, session_id=session.session_id)
 
+            # Update chat context with real execution outcome
+            session.record_execution_result(
+                status=result.status,
+                tasks_completed=result.tasks_completed,
+                total_tasks=result.total_tasks,
+                feedback=result.verification.feedback if result.verification else ""
+            )
+
             console.print("\n" + result.final_response)
             console.print(Panel(
                 "[bold cyan]Autonomous execution completed![/bold cyan]\n"

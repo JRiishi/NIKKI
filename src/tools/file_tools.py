@@ -67,7 +67,8 @@ class WriteFileTool(BaseTool):
 
     def execute(self, path: str, content: str, **kwargs) -> ToolResult:
         t0 = time.perf_counter()
-        p = Path(path)
+        resolved_path = os.path.expandvars(os.path.expanduser(path))
+        p = Path(resolved_path)
         try:
             p.parent.mkdir(parents=True, exist_ok=True)
             with open(p, "w", encoding="utf-8") as f:

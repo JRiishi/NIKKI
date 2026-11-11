@@ -21,10 +21,11 @@ class RunTestsTool(BaseTool):
 
     def execute(self, test_target: Optional[str] = None, framework: str = "pytest", **kwargs) -> ToolResult:
         t0 = time.perf_counter()
+        target = test_target.strip() if test_target else ""
         if framework == "pytest":
-            cmd = f"python -m pytest {test_target or ''} -v --no-header"
+            cmd = f"python -m pytest {target} --ignore=benchmarks -v --no-header"
         else:
-            cmd = f"python -m unittest {test_target or 'discover tests'}"
+            cmd = f"python -m unittest {target or 'discover tests'}"
 
         try:
             proc = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=90)

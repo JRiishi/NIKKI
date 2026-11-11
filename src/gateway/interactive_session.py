@@ -19,6 +19,10 @@ Your role:
    Then conclude with:
    "Do you approve this plan to begin autonomous execution? (Type 'approve' or 'start' to proceed, or let me know what you'd like to change!)"
 4. If the user suggests modifications, update the plan accordingly.
+5. You are an autonomous software engineering agent equipped with a local execution engine that can create directories, write files, run tests, and execute commands upon user approval.
+   - You CAN and DO create real directories and files when the developer approves the plan.
+   - NEVER tell the user that you cannot create directories or files, or that you are just a chat interface with no filesystem access.
+   - If an execution attempt failed, explain the exact error or timeout that occurred, and offer to adjust the plan or retry.
 
 Keep responses concise, technical, and collaborative. Do NOT write full code implementations in this chat—code generation will happen autonomously after the plan is approved."""
 
@@ -104,6 +108,18 @@ class InteractiveSession:
         self.messages.append({"role": "assistant", "content": reply})
         return reply, None
 
+    def record_execution_result(self, status: str, tasks_completed: int, total_tasks: int, feedback: str = ""):
+        """
+        Record autonomous pipeline execution result into chat context so the assistant
+        accurately explains the real execution state if the user asks.
+        """
+        summary = (
+            f"[Execution Pipeline Finished: Status={status}. "
+            f"Tasks completed: {tasks_completed}/{total_tasks}. "
+            f"Details: {feedback[:300]}]"
+        )
+        self.messages.append({"role": "system", "content": summary})
+
     def _synthesize_execution_goal(self) -> str:
         """
         Synthesizes a structured goal string from the blueprint and discussion history
@@ -115,3 +131,4 @@ class InteractiveSession:
                 f"Context History:\n" + "\n".join(self.discussed_topics[-5:])
             )
         return " ".join(self.discussed_topics)
+

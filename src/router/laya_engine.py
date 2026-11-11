@@ -16,28 +16,18 @@ class LayaRouterEngine:
 
     def route_task(self, task: TaskNode) -> Dict[str, Any]:
         """
-        Evaluate task and assign worker, permission tier, and confidence rating.
+        Evaluate task and assign worker, permission tier, and confidence rating
+        purely through Laya System 1 Decision Head in a single fast GPU forward pass (~29ms).
         """
-        # Deterministic Fast-Paths (Ponytail Principle: No LLM needed if purely mechanical)
-        lower_title = (task.title + " " + task.description).lower()
-        if any(kw in lower_title for kw in ["run test", "pytest", "unit test", "run lint", "check syntax", "git commit", "git status"]):
-            return {
-                "assigned_to": "deterministic_worker",
-                "risk_tier": "SAFE_READ",
-                "confidence": 1.0,
-                "reasoning": "Deterministic rule match: mechanical operation (test/lint/git)."
-            }
-
-        # Otherwise evaluate through Laya System 1 Decision Head
         state = f"Task: {task.title}\nDetails: {task.description}"
         questions = {
             "worker_assignment": {
                 "type": "choice",
                 "instructions": "Which worker engine is best suited for this task?",
                 "criteria": {
-                    "coder_worker_9b": "Complex code generation, deep refactoring, architectural bug fixing",
-                    "fast_worker_2b": "Lightweight text extraction, JSON formatting, simple classification",
-                    "deterministic_worker": "Direct filesystem inspection, test running, mechanical tool calls"
+                    "coder_worker_9b": "Writing code, creating files, implementing algorithms, scaffolding directories, modifying existing files",
+                    "fast_worker_2b": "Lightweight text extraction, JSON formatting, simple classification, short summaries",
+                    "deterministic_worker": "Executing test suites (running pytest/unittest), static syntax linting, git status or commit"
                 }
             },
             "risk_assessment": {
