@@ -34,3 +34,4 @@ class BaseTool(ABC):
     def execute(self, **kwargs) -> ToolResult:
         """Execute the tool deterministically."""
         pass
+

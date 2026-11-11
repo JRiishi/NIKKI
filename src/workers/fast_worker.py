@@ -50,3 +50,4 @@ Execute this extraction / analysis task concisely."""
                 error=str(e),
                 worker_name=self.name
             )
+

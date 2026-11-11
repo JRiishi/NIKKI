@@ -47,3 +47,4 @@ class ExecutionHistory:
             status_icon = "✓" if t["status"] == "SUCCESS" else "✗"
             lines.append(f"- [{status_icon}] {t['tool_name']} ({t['execution_time_ms']:.1f}ms): {str(t['tool_output'])[:180]}...")
         return "\n".join(lines)
+

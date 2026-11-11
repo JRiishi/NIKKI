@@ -25,3 +25,4 @@ class BaseWorker(ABC):
     def execute(self, task: TaskNode, context: str) -> WorkerResult:
         """Execute the assigned task node."""
         pass
+

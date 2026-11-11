@@ -49,3 +49,4 @@ class RequestGateway:
             inferred_category=category,
             metadata=metadata or {}
         )
+

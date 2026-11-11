@@ -116,3 +116,4 @@ Decompose this into a minimal task DAG now."""
                 dependencies=["task_2"]
             )
         ]
+

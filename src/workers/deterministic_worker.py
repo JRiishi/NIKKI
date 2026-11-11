@@ -44,3 +44,4 @@ class DeterministicWorker(BaseWorker):
         tool_calls += 1
         res = self.tools.execute("list_dir", task_id=task.id, path=".")
         return WorkerResult(success=res.success, output=res.output, error=res.error, tool_calls_made=tool_calls, worker_name=self.name)
+

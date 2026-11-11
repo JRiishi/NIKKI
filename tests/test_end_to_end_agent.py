@@ -11,6 +11,21 @@ class TestEndToEndAgent(unittest.TestCase):
         cls.service = LocalModelService()
         cls.orchestrator = AgentOrchestrator(model_service=cls.service)
 
+    @classmethod
+    def tearDownClass(cls):
+        target_file = Path("src/string_utils.py")
+        if target_file.exists():
+            try:
+                target_file.unlink(missing_ok=True)
+            except Exception:
+                pass
+        test_file = Path("tests/test_string_utils.py")
+        if test_file.exists():
+            try:
+                test_file.unlink(missing_ok=True)
+            except Exception:
+                pass
+
     def test_01_orchestrator_execution_lifecycle(self):
         """Test full agent lifecycle: gateway -> planner -> laya router -> worker -> verification."""
         goal = "Create a python module `src/string_utils.py` with a function `slugify(text: str) -> str` that lowercases, replaces spaces with hyphens, and removes non-alphanumeric characters."
@@ -30,3 +45,4 @@ class TestEndToEndAgent(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

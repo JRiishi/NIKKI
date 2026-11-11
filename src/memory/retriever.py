@@ -70,3 +70,4 @@ class ContextRetriever:
             # Bound context to preserve prompt budget
             return full_context[:max_chars] + "\n... [context truncated to stay within token budget]"
         return full_context
+

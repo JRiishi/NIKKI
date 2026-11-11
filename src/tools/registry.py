@@ -120,3 +120,4 @@ class ToolRegistry:
             self.history.record_tool_call(tool_name, kwargs, output_or_error, status, elapsed, task_id)
 
         return result
+

@@ -77,3 +77,4 @@ class RunCommandTool(BaseTool):
                 error=str(e),
                 execution_time_ms=(time.perf_counter() - t0)*1000
             )
+

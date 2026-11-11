@@ -70,3 +70,4 @@ class ProjectMemory:
                 parts.append(f"- {d['key'].replace('decision:', '')}: {d['content']}")
 
         return "\n".join(parts) if parts else "No project memory recorded yet."
+
