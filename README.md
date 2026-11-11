@@ -1,10 +1,99 @@
-# NIKKI: Autonomous AI Coding Agent
+<div align="center">
 
-NIKKI is an autonomous, fully local, offline AI software engineering agent powered by Alibaba's **Qwen 3.5** (`qwen3.5:9b`, `qwen3.5:2b`) and Convai's **Laya** (`laya-typed-decisions`). It is engineered to plan, execute, tool-call, verify, and self-correct software engineering workflows on an NVIDIA RTX 5060 Ti GPU with 100% data privacy and zero cloud dependencies.
+```
+███╗   ██╗██╗██╗  ██╗██╗  ██╗██╗
+████╗  ██║██║██║ ██╔╝██║ ██╔╝██║
+██╔██╗ ██║██║█████╔╝ █████╔╝ ██║
+██║╚██╗██║██║██╔═██╗ ██╔═██╗ ██║
+██║ ╚████║██║██║  ██╗██║  ██╗██║
+╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝
+```
+
+### 🧠 AUTONOMOUS · 🔌 OFFLINE · 🔒 PRIVATE · ⚡ GPU-NATIVE
+## The AI Software Engineer That Never Phones Home
+
+**NIKKI plans. NIKKI routes. NIKKI codes. NIKKI tests. NIKKI fixes its own mistakes.**
+**All on your GPU. Zero cloud. Zero API keys. Zero data leaving your machine.**
+
+<br>
+
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Ollama](https://img.shields.io/badge/Ollama-Local_LLMs-000000?style=for-the-badge&logo=ollama&logoColor=white)
+![Qwen](https://img.shields.io/badge/Qwen_3.5-9B_%7C_2B-6B4EFF?style=for-the-badge)
+![Laya](https://img.shields.io/badge/Laya-System_1_Router-FF4F8B?style=for-the-badge)
+![CUDA](https://img.shields.io/badge/CUDA-RTX_5060_Ti-76B900?style=for-the-badge&logo=nvidia&logoColor=white)
+![Offline](https://img.shields.io/badge/Mode-100%25_OFFLINE-critical?style=for-the-badge)
+![SQLite](https://img.shields.io/badge/Memory-SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
+![Tests](https://img.shields.io/badge/Tests-5_Suites-success?style=for-the-badge&logo=pytest&logoColor=white)
+
+</div>
 
 ---
 
-## Architecture Overview
+## 💀 WHAT IS THIS?
+
+Most "AI coding assistants" are a thin wrapper around someone else's server.
+
+**NIKKI is not that.**
+
+NIKKI is a **fully autonomous software engineering agent** with its own brain, its own reflexes, its own hands, and its own internal QA department, running entirely on a single consumer GPU.
+
+You give it a goal. It:
+
+1. 🧩 **Decomposes** it into a dependency DAG of atomic subtasks
+2. ⚡ **Triages** each subtask in **~29 ms** with a non-autoregressive decision engine
+3. 🛠️ **Executes** with a permission-gated toolset (files, terminal, tests, git)
+4. 🔍 **Verifies** with deterministic AST + unit tests, *then* a semantic LLM diff review
+5. 🔁 **Self-corrects**: if verification fails, it retries or replans on its own
+
+> **No cloud. No telemetry. No subscription. Pull the ethernet cable out and it still works.**
+
+---
+
+## 🎬 SEE IT IN ACTION
+
+```bash
+$ python cli.py "Create a function in src/math_utils.py that calculates fibonacci numbers and verify it with a unit test."
+```
+
+```
+[GATEWAY]      ✔ Input sanitized · session a3f9…c1 · intent: coding
+[PLANNER]      ✔ Qwen 9B → DAG of 3 subtasks (acceptance criteria attached)
+[LAYA]         ✔ Routed in ~29ms → coder_worker · deterministic · deterministic
+[CODER]        ✔ ReAct loop → writing src/math_utils.py
+[PERMISSION]   ✔ WORKSPACE_WRITE granted · path contained
+[VERIFY T1]    ✔ AST valid · unit tests passing
+[VERIFY T2]    ✔ Semantic diff review passed
+[ORCHESTRATOR] 🏁 GOAL COMPLETE
+```
+
+---
+
+## 🏗️ THE ARCHITECTURE (it's a lot)
+
+```mermaid
+flowchart TD
+    A[👨‍💻 Developer / CLI / IDE] --> B[🚪 Request Gateway<br/>validation · sessions · intent]
+    B --> C[🎛️ Agent Orchestrator<br/>goal loop · FSM · tracing]
+    C --> D[🧠 Smart Planner<br/>Qwen 3.5 9B → Dependency DAG]
+    D --> E{⚡ LAYA ENGINE<br/>System 1 triage ~29ms}
+    E -->|mechanical| F[🤖 Deterministic Worker<br/>ZERO LLM · tests · git · AST]
+    E -->|light| G[🏃 Fast Worker<br/>Qwen 3.5 2B]
+    E -->|heavy| H[🧑‍💻 Coder Worker<br/>Qwen 3.5 9B · ReAct]
+    F --> I[🛡️ Tool Registry + Permission Gate]
+    G --> I
+    H --> I
+    I --> J[💻 Local Execution<br/>files · terminal · tests · git]
+    J --> K[🔬 Two-Tier Verification]
+    K --> L{Completion Check}
+    L -->|❌ FAIL| M[🔁 Retry / Replan]
+    L -->|✅ PASS| N[🏁 Final Result]
+    M --> C
+    N --> C
+```
+
+<details>
+<summary><b>📟 Prefer the raw ASCII version? Click.</b></summary>
 
 ```
                            DEVELOPER / CLI / IDE
@@ -52,89 +141,98 @@ NIKKI is an autonomous, fully local, offline AI software engineering agent power
                               FAIL        PASS
                                │            │
                          Retry/Replan   Final Result
-                               │            │
-                               └────────────┴──► ORCHESTRATOR
 ```
 
----
-
-## Key Subsystems
-
-### 1. Request Gateway (`src/gateway/`)
-- Sanitizes user input and validates non-empty payloads.
-- Maintains multi-session isolation using UUID4 session identifiers.
-- Classifies user intent (coding, debugging, testing, question, refactor) before orchestration.
-
-### 2. Smart Planner (`src/planner/`)
-- Powered by `qwen3.5:9b` (Q4_K_M).
-- Decomposes high-level software goals into a directed acyclic graph (DAG) of atomic subtasks.
-- Identifies task dependencies, assigns tool categories, and generates strict acceptance criteria.
-- Features automatic JSON schema repair and fallback DAG creation.
-
-### 3. Laya System 1 Decision Engine (`src/router/`)
-- Powered by `convaiinnovations/laya-typed-decisions` (~850 MB, ModernBERT-large backbone on `cuda:0`).
-- Executes non-autoregressive decision inference in **~29 ms**.
-- Routes subtasks to the most efficient worker:
-  - `deterministic`: git actions, running test suites, checking syntax, reading raw files (zero LLM overhead).
-  - `fast_worker`: fast extraction, simple classification, short schemas.
-  - `coder_worker`: code synthesis, multi-turn reasoning, architecture refactoring.
-- Enforces confidence gating: if confidence is below 0.60, falls back safely to Qwen 9B.
-
-### 4. Specialized Workers (`src/workers/`)
-- **DeterministicWorker**: Directly invokes local tools without consuming LLM tokens. Provides 100x speedup for mechanical tasks.
-- **FastWorker**: Leverages `qwen3.5:2b` for lightweight language operations and parameter structuring.
-- **CoderWorker**: Leverages `qwen3.5:9b` with an autonomous ReAct tool-calling loop. Observes tool execution outputs, diagnoses traceback errors, and iteratively fixes code.
-
-### 5. Tool Registry & Permission Gate (`src/tools/`)
-- Multi-tier permission model:
-  - `READ_ONLY`: File reading, directory listing, regex search, AST symbol search.
-  - `WORKSPACE_WRITE`: File writing, atomic line patching.
-  - `SYSTEM_EXEC`: Subprocess execution, test runner, git operations.
-- Path isolation prevents traversal outside the project workspace.
-- Blocks dangerous destructive commands (`rmdir /s /q C:\`, `del /f /s /q *`, `format`).
-
-### 6. Two-Tier Verification Layer (`src/verifier/`)
-- **Tier 1 (Deterministic)**: AST syntax validation across all modified files, followed by automated test execution. Fails immediately if syntax is broken or tests fail.
-- **Tier 2 (Semantic)**: Uses `qwen3.5:9b` to inspect git diffs against acceptance criteria, ensuring no hallucinated or partial implementations pass through.
-
-### 7. Shared Persistent Memory (`src/memory/`)
-- Backed by an offline SQLite database (`.agent_state.db`) using composite primary keys `(session_id, id)` to prevent constraint collisions.
-- **Working Memory**: Tracks current goals, subtasks, DAG execution states, and agent messages.
-- **Project Memory**: Stores project architecture, conventions, and file summaries with **SHA-256 staleness detection** to automatically re-index modified files.
-- **Execution History**: Immutable audit log of every tool call, arguments, exit codes, and durations.
-- **Context Retriever**: Retrieves pertinent history and architectural context for planner and workers.
+</details>
 
 ---
 
-## Hardware Specifications & VRAM Budget
+## 🧬 THE SEVEN SUBSYSTEMS
 
-Tested and verified on host system:
-- **GPU**: NVIDIA GeForce RTX 5060 Ti (16 GB GDDR6/GDDR7 VRAM, Blackwell architecture, Driver 617.14, CUDA 13.4).
-- **CPU**: Intel Core i7-14700K (20 cores, 28 threads).
-- **RAM**: 32 GB DDR5.
-- **Model Storage**: Dedicated fixed drive `D:\AI_Models`.
+### 🚪 1. Request Gateway &nbsp;`src/gateway/`
+The bouncer. Sanitizes every input, rejects empty payloads, isolates sessions with **UUID4** identifiers, and classifies intent (`coding` · `debugging` · `testing` · `question` · `refactor`) *before* a single token is generated.
 
-### Co-Residency VRAM Allocation
-| Model | Parameters | Precision / Quant | VRAM Footprint | Location |
+### 🧠 2. Smart Planner &nbsp;`src/planner/`
+Powered by `qwen3.5:9b` (Q4_K_M). Turns vague human goals into a **directed acyclic graph** of atomic subtasks, complete with dependencies, tool categories, and **strict acceptance criteria**. Ships with automatic **JSON schema repair** and **fallback DAG creation**, because LLMs lie about JSON and NIKKI knows it.
+
+### ⚡ 3. Laya System 1 Decision Engine &nbsp;`src/router/`
+The reflex arc. A **~850 MB ModernBERT-large** backbone on `cuda:0` makes **non-autoregressive routing decisions in ~29 ms**. No token-by-token generation. Just instant triage.
+
+| Route | What it handles | Cost |
+|---|---|---|
+| `deterministic` | git, test suites, syntax checks, raw file reads | **0 LLM tokens** |
+| `fast_worker` | extraction, classification, short schemas | Qwen 2B |
+| `coder_worker` | code synthesis, multi-turn reasoning, refactors | Qwen 9B |
+
+🔒 **Confidence gating:** if Laya's confidence drops below **0.60**, it safely escalates to Qwen 9B. It knows what it doesn't know.
+
+### 🦾 4. Specialized Workers &nbsp;`src/workers/`
+- **🤖 DeterministicWorker**: calls tools directly with no LLM overhead. Roughly a **100× speedup** on mechanical tasks.
+- **🏃 FastWorker**: `qwen3.5:2b` for lightweight language ops and parameter structuring.
+- **🧑‍💻 CoderWorker**: `qwen3.5:9b` in an autonomous **ReAct tool-calling loop**. Runs code, reads the traceback, diagnoses the failure, and patches it.
+
+### 🛡️ 5. Tool Registry & Permission Gate &nbsp;`src/tools/`
+
+```
+┌──────────────────┬──────────────────────────────────────────────┐
+│ READ_ONLY        │ file read · dir listing · regex · AST search │
+│ WORKSPACE_WRITE  │ file write · atomic line patching            │
+│ SYSTEM_EXEC      │ subprocess · test runner · git               │
+└──────────────────┴──────────────────────────────────────────────┘
+```
+- 🚧 **Path isolation**: no traversal outside the project workspace
+- ☠️ **Destructive command blocking**: `rmdir /s /q C:\`, `del /f /s /q *`, `format` and friends are dead on arrival
+
+### 🔬 6. Two-Tier Verification &nbsp;`src/verifier/`
+**Nothing is "done" until it survives both tiers:**
+
+| Tier | Method | Catches |
+|---|---|---|
+| **Tier 1** | Deterministic AST validation + automated test execution | Broken syntax, failing tests |
+| **Tier 2** | Qwen 9B inspects the git diff against acceptance criteria | Hallucinated or half-finished implementations |
+
+### 🗄️ 7. Shared Persistent Memory &nbsp;`src/memory/`
+Offline SQLite (`.agent_state.db`) with composite primary keys `(session_id, id)`:
+
+- 🧠 **Working Memory**: goals, subtasks, DAG state, agent messages
+- 📚 **Project Memory**: architecture, conventions, file summaries with **SHA-256 staleness detection** that re-indexes changed files automatically
+- 📜 **Execution History**: immutable audit log of every tool call, argument, exit code, and duration
+- 🔎 **Context Retriever**: feeds the planner and workers exactly the history they need
+
+---
+
+## 🖥️ HARDWARE & VRAM BUDGET
+
+Built, tested, and verified on:
+
+| Component | Spec |
+|---|---|
+| 🎮 **GPU** | NVIDIA GeForce RTX 5060 Ti · 16 GB VRAM · Blackwell · CUDA 13.4 |
+| 🧮 **CPU** | Intel Core i7-14700K · 20 cores / 28 threads |
+| 💾 **RAM** | 32 GB DDR5 |
+| 📦 **Models** | Dedicated drive `D:\AI_Models` |
+
+### 🧱 Three models. One GPU. Zero swapping.
+
+| Model | Params | Quant | VRAM | Runtime |
 |---|---|---|---|---|
-| `qwen3.5:9b` | 9 Billion | Q4_K_M (Ollama) | ~5.3 GB | Ollama (`D:\AI_Models\Ollama`) |
-| `qwen3.5:2b` | 2 Billion | Q4_K_M (Ollama) | ~2.1 GB | Ollama (`D:\AI_Models\Ollama`) |
-| `laya` | 421 Million | FP16 (PyTorch CUDA) | ~1.6 GB | PyTorch (`D:\AI_Models\Laya`) |
-| **Total Co-Residency** | — | — | **~9.0 GB** | **Leaves ~7.0 GB VRAM free** |
+| `qwen3.5:9b` | 9B | Q4_K_M | ~5.3 GB | Ollama |
+| `qwen3.5:2b` | 2B | Q4_K_M | ~2.1 GB | Ollama |
+| `laya` | 421M | FP16 | ~1.6 GB | PyTorch CUDA |
+| **TOTAL** | | | **~9.0 GB** | **~7.0 GB still free** 😎 |
 
 ---
 
-## Getting Started
+## 🚀 LAUNCH SEQUENCE
 
-### 1. Prerequisites
-Ensure Ollama is running and configured to use the local models on drive `D:`:
+### 1️⃣ Fire up Ollama
 ```powershell
 $env:OLLAMA_MODELS = "D:\AI_Models\Ollama"
 ollama serve
 ```
 
-### 2. Environment Setup
-The `.env` file enforces completely offline execution:
+### 2️⃣ Lock it offline
+Your `.env` enforces **total network isolation**:
 ```ini
 OFFLINE_MODE=true
 HF_HUB_OFFLINE=1
@@ -147,45 +245,103 @@ QWEN_FAST_MODEL=qwen3.5:2b
 LAYA_MODEL_PATH=D:\AI_Models\Laya\typed-decisions
 ```
 
-### 3. Check System Health
-Run the diagnostic dashboard to verify all models and GPU acceleration:
-```powershell
+### 3️⃣ Run the diagnostics dashboard
+```bash
 python cli.py --health
 ```
 
-### 4. Run an Autonomous Goal
-You can provide tasks directly to the CLI or enter interactive mode:
-
-```powershell
-# Single goal execution
+### 4️⃣ Unleash it
+```bash
+# One-shot autonomous goal
 python cli.py "Create a function in src/math_utils.py that calculates fibonacci numbers and verify it with a unit test."
 
 # Interactive mode
 python cli.py
 ```
 
-### 5. Running the Test Suite
-NIKKI features a comprehensive test suite covering all layers:
+---
+
+## 🧪 TEST SUITE
+
 ```powershell
 $env:PYTHONPATH = "."
 python -m unittest discover tests
 ```
 
-Tests include:
-- `tests/test_offline_and_adapters.py`: Validates offline constraints, Ollama connection, and Laya inference.
-- `tests/test_memory.py`: Tests SQLite persistence, composite keys, SHA-256 staleness, and context retrieval.
-- `tests/test_tools.py`: Validates PermissionGate tiers, file editing, AST linting, test runners, and regex search.
-- `tests/test_routing_and_planner.py`: Tests Laya System 1 routing, confidence gating, and Qwen 9B DAG planning.
-- `tests/test_end_to_end_agent.py`: Full autonomous execution cycle (planning -> routing -> tool execution -> verification -> completion).
+| Suite | What it proves |
+|---|---|
+| `test_offline_and_adapters.py` | Offline constraints hold · Ollama connects · Laya infers |
+| `test_memory.py` | SQLite persistence · composite keys · SHA-256 staleness · retrieval |
+| `test_tools.py` | Permission tiers · file editing · AST linting · test runner · regex search |
+| `test_routing_and_planner.py` | Laya routing · confidence gating · Qwen 9B DAG planning |
+| `test_end_to_end_agent.py` | **The whole loop**: plan → route → execute → verify → complete |
 
 ---
 
-## Architectural Rules Enforced
-1. **Orchestrator owns the lifecycle**: State transitions are strictly controlled via FSM.
-2. **Planner decides WHAT**: Qwen 9B generates explicit DAG subtasks with acceptance criteria.
-3. **Laya decides WHICH**: Laya routes tasks in ~29 ms based on task semantics and tool affinity.
-4. **Deterministic offload**: Never invoke an LLM when deterministic code can do the job (git, AST, test running).
-5. **Gated execution**: Every tool call is screened for security, path containment, and argument validity.
-6. **Unified shared memory**: All workers read and write to the centralized SQLite state engine.
-7. **Two-tier verification**: No task is marked complete without syntax checks, test passing, and semantic diff review.
-8. **Controlled retries**: Verification failures trigger targeted worker retry loops or replanning.
+## ⚖️ THE EIGHT LAWS OF NIKKI
+
+> Break these and the architecture breaks.
+
+1. 👑 **The Orchestrator owns the lifecycle.** State transitions are FSM-controlled.
+2. 🧠 **The Planner decides WHAT.** Explicit DAG subtasks with acceptance criteria.
+3. ⚡ **Laya decides WHICH.** Task semantics and tool affinity, routed in ~29 ms.
+4. 🤖 **Deterministic offload.** Never invoke an LLM when plain code can do the job.
+5. 🛡️ **Gated execution.** Every tool call is screened for security, containment, and argument validity.
+6. 🗄️ **Unified shared memory.** Every worker reads and writes the same SQLite state engine.
+7. 🔬 **Two-tier verification.** No completion without syntax, tests, *and* semantic diff review.
+8. 🔁 **Controlled retries.** Failures trigger targeted retries or full replanning.
+
+---
+
+## 🗺️ REPO MAP
+
+```
+NIKKI/
+├── 📂 src/
+│   ├── gateway/     # Input validation, sessions, intent
+│   ├── planner/     # Qwen 9B → dependency DAGs
+│   ├── router/      # Laya System 1 decision engine
+│   ├── workers/     # Deterministic · Fast · Coder
+│   ├── tools/       # Registry + permission gate
+│   ├── verifier/    # Two-tier verification
+│   └── memory/      # SQLite working / project / history
+├── 📂 benchmarks/
+├── 📂 config/
+├── 📂 docs/
+├── 📂 tests/
+├── 🐍 cli.py        # Command-line entry point
+├── 🔧 start_ollama.ps1
+├── 📄 .env.example
+└── 📄 requirements.txt
+```
+
+---
+
+## 🧠 WHY NIKKI HITS DIFFERENT
+
+| | ☁️ Typical AI Coder | 🔥 **NIKKI** |
+|---|---|---|
+| Runs on | Someone else's servers | **Your GPU** |
+| Your code goes to | The cloud | **Nowhere** |
+| Needs internet | Yes | **No** |
+| API bills | Yes | **None** |
+| Routing | One giant model for everything | **29 ms reflex layer + tiered workers** |
+| Mechanical tasks | Burn tokens | **Zero-LLM deterministic execution** |
+| Verification | "Looks good to me" | **AST + tests + semantic diff review** |
+| Memory | Forgets everything | **Persistent SQLite with staleness detection** |
+| Safety | Hope | **Permission tiers + path isolation + command blocklist** |
+
+---
+
+<div align="center">
+
+### ⭐ If this made you raise an eyebrow, star the repo. ⭐
+
+**Built by [@JRiishi](https://github.com/JRiishi)**
+*Your code. Your GPU. Your agent.*
+
+```
+ N I K K I   //   P L A N   ▸   R O U T E   ▸   B U I L D   ▸   V E R I F Y   ▸   R E P E A T
+```
+
+</div>
