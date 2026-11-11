@@ -30,7 +30,8 @@ Keep responses concise, technical, and collaborative. Do NOT write full code imp
 APPROVAL_KEYWORDS = {
     "approve", "approved", "start", "proceed", "go ahead", "looks good", 
     "lgtm", "yes", "do it", "build it", "start project", "let's do it", 
-    "lets do it", "let's go", "lets go", "ok to proceed", "run it"
+    "lets do it", "let's go", "lets go", "ok to proceed", "run it",
+    "fix it", "fix this", "fix", "please fix", "repair it", "yes fix it"
 }
 
 class InteractiveSession:
@@ -61,7 +62,7 @@ class InteractiveSession:
 
         # 1. Check if user is giving approval
         is_approval = lower_text in APPROVAL_KEYWORDS or any(
-            lower_text.startswith(kw) for kw in ["approve", "start", "proceed", "go ahead"]
+            lower_text.startswith(kw) or kw in lower_text for kw in ["approve", "start", "proceed", "go ahead", "fix it", "fix this", "fix for me"]
         )
 
         if is_approval:
@@ -86,17 +87,23 @@ class InteractiveSession:
         if len(clean_text) > 5 and lower_text not in ("hello", "hi", "hey"):
             self.discussed_topics.append(clean_text)
 
-        # 3. Add to chat history
+        # 3. Add to chat history (with sliding window to protect context memory)
         self.messages.append({"role": "user", "content": clean_text})
+        bounded_messages = [self.messages[0]] + self.messages[-8:] if len(self.messages) > 9 else self.messages
 
         # 4. Generate assistant response using Qwen 9B
         try:
             chat_result = self.service.chat(
                 model_key="qwen_primary",
-                messages=self.messages,
+                messages=bounded_messages,
                 temperature=0.3
             )
-            reply = chat_result.get("content", "")
+            reply = chat_result.get("content", "").strip()
+            if not reply:
+                reply = (
+                    "I understand the issue. Type **'approve'** or **'start'** to start the "
+                    "autonomous repair pipeline and patch the code files directly!"
+                )
         except Exception as e:
             # Fallback if Ollama encounters issue
             reply = f"Error communicating with local AI model: {e}"
