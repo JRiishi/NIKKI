@@ -1,7 +1,7 @@
 import json
 import re
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from pydantic import BaseModel
 from src.tools.registry import ToolRegistry
 from src.service.model_service import LocalModelService
@@ -12,6 +12,7 @@ class VerificationReport(BaseModel):
     review_score: float = 1.0
     feedback: str = ""
     suggested_fix: Optional[str] = None
+    files_inspected: List[str] = []
 
 REVIEWER_SYSTEM_PROMPT = """You are the Senior Code Reviewer and Quality Gate for an Autonomous Coding Agent.
 Your job is to rigorously review the changes made by the agent against the user's objective and task criteria.
@@ -168,7 +169,8 @@ Review these changes and output your JSON verification verdict."""
                 deterministic_passed=deterministic_passed,
                 review_score=verdict.get("score", 1.0),
                 feedback=verdict.get("feedback", "Review completed successfully."),
-                suggested_fix=verdict.get("suggested_fix")
+                suggested_fix=verdict.get("suggested_fix"),
+                files_inspected=relevant_files
             )
         except Exception as e:
             # Fallback to deterministic check result
@@ -176,7 +178,8 @@ Review these changes and output your JSON verification verdict."""
                 passed=deterministic_passed,
                 deterministic_passed=deterministic_passed,
                 review_score=0.8,
-                feedback=f"Reviewer completed with note: {e}"
+                feedback=f"Reviewer completed with note: {e}",
+                files_inspected=relevant_files
             )
 
     def _parse_review_json(self, text: str) -> Dict[str, Any]:

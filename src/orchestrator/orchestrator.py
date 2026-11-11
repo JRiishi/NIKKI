@@ -147,11 +147,13 @@ class AgentOrchestrator:
 
         elapsed = time.perf_counter() - t_start
 
+        files_str = ", ".join(f"`{f}`" for f in verif_report.files_inspected) if verif_report.files_inspected else "None"
         final_response = (
             f"### Execution Summary for Session [{sid}]\n"
             f"- **Status:** {overall_status}\n"
             f"- **Goal:** {validated.sanitized_prompt}\n"
             f"- **Tasks Completed:** {len(completed_tasks)}/{len(wm.tasks)}\n"
+            f"- **Files Created / Verified:** {files_str}\n"
             f"- **Tool Invocations:** {total_tool_calls}\n"
             f"- **Verification Score:** {verif_report.review_score:.2f} ({'PASSED' if verif_report.passed else 'FAILED'})\n"
             f"- **Feedback:** {verif_report.feedback}\n"

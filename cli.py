@@ -94,7 +94,8 @@ def run_interactive_chat(service: LocalModelService, session_id: str = None):
                 status=result.status,
                 tasks_completed=result.tasks_completed,
                 total_tasks=result.tasks_completed + result.tasks_failed,
-                feedback=result.verification.feedback if result.verification else ""
+                feedback=result.verification.feedback if result.verification else "",
+                files=result.verification.files_inspected if result.verification else []
             )
 
             console.print("\n" + result.final_response)
