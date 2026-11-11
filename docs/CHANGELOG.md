@@ -1,6 +1,6 @@
-# Niiki Changelog & Development Record
+# NIKKI Changelog & Development Record
 
-All notable changes, fixes, refactorings, and test records for the Niiki project.
+All notable changes, fixes, refactorings, and test records for the NIKKI project.
 
 ---
 

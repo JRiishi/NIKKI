@@ -1,5 +1,5 @@
 # ==============================================================================
-# Niiki: Autonomous AI Coding Agent — Python Dependencies
+# NIKKI: Autonomous AI Coding Agent — Python Dependencies
 # ==============================================================================
 
 # --- Core AI & Model Runtimes ---

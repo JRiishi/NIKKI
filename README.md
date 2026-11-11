@@ -1,6 +1,6 @@
-# Niiki: Autonomous AI Coding Agent
+# NIKKI: Autonomous AI Coding Agent
 
-Niiki is an autonomous, fully local, offline AI software engineering agent powered by Alibaba's **Qwen 3.5** (`qwen3.5:9b`, `qwen3.5:2b`) and Convai's **Laya** (`laya-typed-decisions`). It is engineered to plan, execute, tool-call, verify, and self-correct software engineering workflows on an NVIDIA RTX 5060 Ti GPU with 100% data privacy and zero cloud dependencies.
+NIKKI is an autonomous, fully local, offline AI software engineering agent powered by Alibaba's **Qwen 3.5** (`qwen3.5:9b`, `qwen3.5:2b`) and Convai's **Laya** (`laya-typed-decisions`). It is engineered to plan, execute, tool-call, verify, and self-correct software engineering workflows on an NVIDIA RTX 5060 Ti GPU with 100% data privacy and zero cloud dependencies.
 
 ---
 
@@ -165,7 +165,7 @@ python cli.py
 ```
 
 ### 5. Running the Test Suite
-Niiki features a comprehensive test suite covering all layers:
+NIKKI features a comprehensive test suite covering all layers:
 ```powershell
 $env:PYTHONPATH = "."
 python -m unittest discover tests

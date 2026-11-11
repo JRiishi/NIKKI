@@ -13,7 +13,7 @@ class TestInteractiveSession(unittest.TestCase):
         reply, goal = session.handle_message("Hello")
         self.assertIsNotNone(reply)
         self.assertIsNone(goal, "Greeting should not trigger code execution.")
-        self.assertIn("Niiki", reply)
+        self.assertTrue("nikki" in reply.lower(), f"Expected 'nikki' in reply, got: {reply}")
 
     def test_02_approval_without_discussion_is_rejected(self):
         session = InteractiveSession(model_service=self.service)

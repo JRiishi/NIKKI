@@ -1,13 +1,13 @@
-# Niiki Module & Codebase Guide
+# NIKKI Module & Codebase Guide
 
-This document is a comprehensive technical reference for engineers working on or extending the Niiki codebase.
+This document is a comprehensive technical reference for engineers working on or extending the NIKKI codebase.
 
 ---
 
 ## 1. Directory Tree & Overview
 
 ```text
-Niiki/
+NIKKI/
 ├── cli.py                     # Primary user entry point: Rich terminal REPL & one-shot CLI
 ├── pytest.ini                 # Pytest configuration (excludes benchmarks, sets rootdir)
 ├── requirements.txt           # Python package dependencies

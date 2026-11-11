@@ -1,10 +1,10 @@
-# Niiki Architecture Documentation
+# NIKKI Architecture Documentation
 
 ## 1. System Overview
 
-Niiki is an autonomous local software engineering agent designed for 100% offline local inference on Windows 11 hardware (tested on NVIDIA GeForce RTX 5060 Ti 16GB VRAM, Intel Core i7-14700K, 32GB RAM). 
+NIKKI is an autonomous local software engineering agent designed for 100% offline local inference on Windows 11 hardware (tested on NVIDIA GeForce RTX 5060 Ti 16GB VRAM, Intel Core i7-14700K, 32GB RAM). 
 
-Niiki does not call any external cloud APIs. All inference runs locally:
+NIKKI does not call any external cloud APIs. All inference runs locally:
 - **Primary LLM (9B):** `qwen3.5:9b` via Ollama (`127.0.0.1:11434`), loaded in 4-bit quantization (`Q4_K_M`, ~6.6GB VRAM). Used for conversational discovery, architectural DAG planning, multi-turn code synthesis (ReAct loop), and semantic code review.
 - **Lightweight LLM (2B):** `qwen3.5:2b` via Ollama (`127.0.0.1:11434`), loaded in 8-bit quantization (`Q8_0`, ~2.7GB VRAM). Used for fast summaries, quick transforms, and light edits.
 - **System 1 Neural Router:** `convaiinnovations/laya` (typed-decisions head, ~850MB FP16) loaded directly onto PyTorch CUDA (`cuda:0`). Evaluates criteria embeddings in ~29ms latency to select the optimal execution worker.
@@ -125,8 +125,8 @@ graph LR
 python cli.py
 ```
 - Launches `InteractiveSession` REPL powered by Rich formatting.
-- User chats freely with Niiki (Qwen 9B) to refine requirements and design.
-- Niiki asks clarifying questions and proposes a formal `PROJECT BLUEPRINT`.
+- User chats freely with NIKKI (Qwen 9B) to refine requirements and design.
+- NIKKI asks clarifying questions and proposes a formal `PROJECT BLUEPRINT`.
 - When user approves (`approve` / `start`), `cli.py` invokes `orchestrator.run(approved_goal)`.
 - Live pipeline runs, updates SQLite state, and injects execution summary back into chat memory.
 

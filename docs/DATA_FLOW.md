@@ -1,4 +1,4 @@
-# Niiki Data Flow & Request Lifecycle
+# NIKKI Data Flow & Request Lifecycle
 
 ## 1. End-to-End Request Lifecycle Sequence
 

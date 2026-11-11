@@ -40,7 +40,7 @@ def run_interactive_chat(service: LocalModelService, session_id: str = None):
     and requires explicit developer approval before initiating autonomous execution.
     """
     banner = (
-        "[bold cyan]Welcome to Niiki — Autonomous Local AI Software Engineer[/bold cyan]\n\n"
+        "[bold cyan]Welcome to NIKKI — Autonomous Local AI Software Engineer[/bold cyan]\n\n"
         "• Chat freely about your project, architecture, dependencies, and requirements.\n"
         "• We will refine the design until you are satisfied.\n"
         "• Once ready, give [bold green]one approval[/bold green] (type [bold green]'approve'[/bold green] or [bold green]'start'[/bold green]) to begin autonomous execution.\n"
@@ -75,7 +75,7 @@ def run_interactive_chat(service: LocalModelService, session_id: str = None):
             continue
 
         # Process user message through conversational discovery engine
-        with console.status("[bold cyan]Niiki is thinking...[/bold cyan]"):
+        with console.status("[bold cyan]NIKKI is thinking...[/bold cyan]"):
             reply, approved_goal = session.handle_message(user_input)
 
         if approved_goal is not None:
@@ -106,7 +106,7 @@ def run_interactive_chat(service: LocalModelService, session_id: str = None):
             ))
         else:
             # Display conversational response
-            console.print("\n[bold cyan]Niiki:[/bold cyan]")
+            console.print("\n[bold cyan]NIKKI:[/bold cyan]")
             console.print(Markdown(reply))
 
 def run_cli():

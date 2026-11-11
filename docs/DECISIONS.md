@@ -1,6 +1,6 @@
 # Architectural Decision Records (ADRs) & Technical Tradeoffs
 
-This document details the core architectural decisions made in Niiki, the justification for each design choice, alternative approaches considered, and current technical debt or known limitations.
+This document details the core architectural decisions made in NIKKI, the justification for each design choice, alternative approaches considered, and current technical debt or known limitations.
 
 ---
 
