@@ -73,7 +73,17 @@ class VerificationLayer:
 
         # 2. Inspect git diff for modified code
         diff_res = self.tools.execute("git_diff")
-        diff_text = diff_res.output.get("diff", "") if diff_res.success and diff_res.output else "No git diff recorded."
+        diff_text = diff_res.output.get("diff", "") if diff_res.success and diff_res.output else ""
+        if not diff_text:
+            # Check latest git commit or unstaged status
+            status_res = self.tools.execute("git_status")
+            diff_text = f"Workspace Git Status:\n{status_res.output}"
+            # Also check if files like src/string_utils.py exist and read content
+            import glob
+            py_files = list(Path("src").glob("*.py"))
+            for pf in py_files:
+                if pf.name != "__init__.py":
+                    diff_text += f"\n\nFile [{pf.as_posix()}]:\n{pf.read_text(encoding='utf-8', errors='ignore')}"
 
         # 3. Cognitive Review with Qwen 9B
         review_prompt = f"""User Objective:

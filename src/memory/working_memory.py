@@ -117,7 +117,7 @@ class WorkingMemory:
                 task.outputs.update(outputs)
             if error:
                 task.error = error
-            self.db.update_task_status(task_id, status, task.outputs, task.error)
+            self.db.update_task_status(task_id, status, task.outputs, task.error, session_id=self.session_id)
 
     def send_agent_message(self, sender: str, receiver: str, message_type: str, content: str) -> None:
         self.db.log_message(self.session_id, sender, receiver, message_type, content)

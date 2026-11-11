@@ -55,6 +55,8 @@ class GitDiffTool(BaseTool):
             cmd = "git diff --staged" if staged else "git diff"
             if file_path:
                 cmd += f" -- {file_path}"
+            else:
+                cmd += " -- . ':(exclude)*.pyc' ':(exclude)*.db*'"
 
             res = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=15)
             if res.returncode != 0:

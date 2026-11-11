@@ -1,24 +1,24 @@
-import re
-
-
 def slugify(text: str) -> str:
     """
-    Convert text to a URL-friendly slug.
+    Converts text to a URL-friendly slug by lowercasing, replacing spaces with hyphens,
+    and removing non-alphanumeric characters.
     
     Args:
-        text: Input string to convert
-    
+        text: The input text string
+        
     Returns:
-        Lowercase string with spaces replaced by hyphens and non-alphanumeric
-        characters removed (except hyphens)
+        A URL-friendly slug string
     """
-    # Lowercase the text
+    # Convert to lowercase
     slug = text.lower()
     
     # Replace spaces with hyphens
     slug = slug.replace(' ', '-')
     
-    # Remove non-alphanumeric characters except hyphens
-    slug = re.sub(r'[^a-z0-9-]', '', slug)
+    # Remove all non-alphanumeric characters except hyphens
+    slug = ''.join(c if c.isalnum() or c == '-' else '' for c in slug)
+    
+    # Strip leading and trailing hyphens
+    slug = slug.strip('-')
     
     return slug

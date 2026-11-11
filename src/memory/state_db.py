@@ -40,7 +40,7 @@ class StateDatabase:
             );
 
             CREATE TABLE IF NOT EXISTS tasks (
-                id TEXT PRIMARY KEY,
+                id TEXT NOT NULL,
                 session_id TEXT NOT NULL,
                 title TEXT NOT NULL,
                 description TEXT,
@@ -52,6 +52,7 @@ class StateDatabase:
                 error TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (session_id, id),
                 FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
             );
 
@@ -138,15 +139,24 @@ class StateDatabase:
         task_id: str,
         status: str,
         outputs: Optional[Dict[str, Any]] = None,
-        error: Optional[str] = None
+        error: Optional[str] = None,
+        session_id: Optional[str] = None
     ) -> None:
         with self._connection() as conn:
-            conn.execute(
-                """UPDATE tasks
-                   SET status = ?, outputs = ?, error = ?, updated_at = CURRENT_TIMESTAMP
-                   WHERE id = ?""",
-                (status, json.dumps(outputs or {}), error, task_id)
-            )
+            if session_id:
+                conn.execute(
+                    """UPDATE tasks
+                       SET status = ?, outputs = ?, error = ?, updated_at = CURRENT_TIMESTAMP
+                       WHERE id = ? AND session_id = ?""",
+                    (status, json.dumps(outputs or {}), error, task_id, session_id)
+                )
+            else:
+                conn.execute(
+                    """UPDATE tasks
+                       SET status = ?, outputs = ?, error = ?, updated_at = CURRENT_TIMESTAMP
+                       WHERE id = ?""",
+                    (status, json.dumps(outputs or {}), error, task_id)
+                )
 
     def get_tasks_for_session(self, session_id: str) -> List[Dict[str, Any]]:
         with self._connection() as conn:
