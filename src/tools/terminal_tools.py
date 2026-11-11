@@ -40,6 +40,25 @@ class RunCommandTool(BaseTool):
                     execution_time_ms=(time.perf_counter() - t0)*1000
                 )
 
+        # Cross-platform handling for mkdir / mkdir -p on Windows
+        stripped = command.strip()
+        if stripped.startswith("mkdir ") or stripped.startswith("mkdir -p "):
+            parts = stripped.split()[1:]
+            dirs = [p for p in parts if not p.startswith("-")]
+            if dirs:
+                try:
+                    import os as _os
+                    for d in dirs:
+                        target = _os.path.join(cwd or ".", d.strip('"').strip("'"))
+                        _os.makedirs(target, exist_ok=True)
+                    return ToolResult(
+                        success=True,
+                        output={"command": command, "stdout": f"Directories ensured: {', '.join(dirs)}", "stderr": ""},
+                        execution_time_ms=(time.perf_counter() - t0)*1000
+                    )
+                except Exception as e:
+                    return ToolResult(success=False, error=str(e), execution_time_ms=(time.perf_counter() - t0)*1000)
+
         try:
             proc = subprocess.run(
                 command,

@@ -101,8 +101,14 @@ class InteractiveSession:
             # Fallback if Ollama encounters issue
             reply = f"Error communicating with local AI model: {e}"
 
-        # 5. Check if the assistant proposed a project blueprint
-        if "project blueprint" in reply.lower() or "do you approve" in reply.lower() or "acceptance criteria" in reply.lower():
+        # 5. Check if the assistant proposed an actual project blueprint
+        lower_reply = reply.lower()
+        is_clarification = any(p in lower_reply for p in ["i'll present", "i will present", "quick clarifications", "clarifying questions", "before we lock in"])
+        is_actual_blueprint = (
+            ("project blueprint" in lower_reply and ("do you approve" in lower_reply or "file structure" in lower_reply or "acceptance criteria" in lower_reply))
+            or ("do you approve this plan" in lower_reply)
+        )
+        if is_actual_blueprint and not is_clarification:
             self.plan_proposed = True
             self.last_proposed_blueprint = reply
 
@@ -126,10 +132,11 @@ class InteractiveSession:
         Synthesizes a structured goal string from the blueprint and discussion history
         to pass into the SmartPlanner and Orchestrator.
         """
+        user_reqs = " ".join(self.discussed_topics)
         if self.last_proposed_blueprint:
             return (
-                f"Project Specification:\n{self.last_proposed_blueprint}\n\n"
-                f"Context History:\n" + "\n".join(self.discussed_topics[-5:])
+                f"User Goal:\n{user_reqs}\n\n"
+                f"Approved Blueprint Specification:\n{self.last_proposed_blueprint}"
             )
-        return " ".join(self.discussed_topics)
+        return user_reqs
 

@@ -42,7 +42,9 @@ Available Tools:
 RULES:
 1. Prefer modifying existing files with patch_file or write_file.
 2. Ensure correct Python syntax.
-3. Once changes are made, respond with "action": "finish".
+3. write_file automatically creates all parent directories; you never need to run mkdir.
+4. Write complete files directly to their target relative paths (e.g. "tik_tak_toe/app.py").
+5. Once changes are made, respond with "action": "finish".
 """
 
 class CoderWorker(BaseWorker):
@@ -51,7 +53,7 @@ class CoderWorker(BaseWorker):
     Performs multi-turn code synthesis, file inspection, diff patching, and debugging.
     """
 
-    def __init__(self, tool_registry: ToolRegistry, model_service: LocalModelService, max_iterations: int = 5):
+    def __init__(self, tool_registry: ToolRegistry, model_service: LocalModelService, max_iterations: int = 8):
         super().__init__(name="coder_worker_9b", tool_registry=tool_registry)
         self.service = model_service
         self.max_iterations = max_iterations
