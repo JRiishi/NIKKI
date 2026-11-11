@@ -1,0 +1,87 @@
+{
+  "timestamp": "2026-11-11 01:14:04",
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 5060 Ti",
+    "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "ram_total_gb": 31.71
+  },
+  "models": {
+    "laya_decision": {
+      "load_time_s": 32.75,
+      "avg_latency_ms": 5809.76,
+      "runs_ms": [
+        17328.77,
+        29.0,
+        71.51
+      ],
+      "peak_vram_mb": 9662.82,
+      "peak_ram_mb": 20973.97,
+      "answers": {
+        "task_category": {
+          "type": "choice",
+          "choice": "bugfix",
+          "probabilities": {
+            "bugfix": 0.4178,
+            "feature": 0.1739,
+            "infra": 0.1115,
+            "security": 0.2968
+          },
+          "confidence": 0.081,
+          "answer_confidence": 0.4178,
+          "action": {
+            "act_probability": 1.0
+          }
+        },
+        "severity": {
+          "type": "score",
+          "score": 2.2283,
+          "legend": {
+            "0": "P3 - Trivial",
+            "1": "P2 - Minor inconvenience",
+            "2": "P1 - Significant degraded service",
+            "3": "P0 - Total outage"
+          },
+          "probabilities": {
+            "0": 0.0164,
+            "1": 0.1011,
+            "2": 0.5203,
+            "3": 0.3622
+          },
+          "confidence": 0.2737,
+          "answer_confidence": 0.5203,
+          "action": {
+            "act_probability": 1.0
+          }
+        },
+        "requires_hotfix": {
+          "type": "noul",
+          "noul": 0.6503,
+          "confidence": 0.6503,
+          "answer_confidence": 0.6503,
+          "action": {
+            "act_probability": 1.0
+          }
+        }
+      },
+      "device": "cuda:0"
+    },
+    "qwen_lightweight": {
+      "eval_tok_per_sec": 128.33,
+      "prompt_eval_tok_per_sec": 91.39,
+      "eval_tokens": 2574,
+      "total_duration_s": 20.825,
+      "peak_vram_mb": 9669.45,
+      "peak_ram_mb": 20964.2,
+      "sample_output_classification": "BUGFIX"
+    },
+    "qwen_primary": {
+      "eval_tok_per_sec": 63.4,
+      "prompt_eval_tok_per_sec": 993.52,
+      "eval_tokens": 1484,
+      "total_duration_s": 30.889,
+      "peak_vram_mb": 9617.74,
+      "peak_ram_mb": 21334.99,
+      "code_response_summary": "# Analysis of `process_refund()` Function\n\n## \ud83d\udd0d Identified Issues\n\n### 1. **Race Condition (Critical)**\nThe status check and update are not atomic, allowing multiple concurrent requests to refund the same order.\n\n```python\n# Timeline showing race condition:\nThread A: tx.status == \"COMPLETED\" \u2192 True\n..."
+    }
+  }
+}
