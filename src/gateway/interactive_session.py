@@ -73,7 +73,7 @@ class InteractiveSession:
             elif len(self.messages) > 1 and len(self.discussed_topics) > 0:
                 # Plan hasn't been explicitly formatted yet, but topics were discussed
                 goal = f"Implement and verify: {' '.join(self.discussed_topics)}"
-                reply = "✓ Project approved! Initiating autonomous engineering pipeline..."
+                reply = "✓ Plan approved! Initiating autonomous engineering pipeline..."
                 return reply, goal
             else:
                 return (

@@ -6,4 +6,8 @@ __pycache__/
 .venv/
 venv/
 .pytest_cache/
+.vscode/
+test_*.py
+!tests/test_*.py
+
 

@@ -95,9 +95,13 @@ class AgentOrchestrator:
             wm.update_task_status(task.id, status="IN_PROGRESS")
 
             # Route task via Laya System 1 Decision Engine
-            routing_decision = self.router.route_task(task)
-            assigned_worker_key = routing_decision["assigned_to"]
-            task.assigned_to = assigned_worker_key
+            # If task failed and was escalated on retry, preserve escalation to coder_worker_9b
+            if task_retry_counts.get(task.id, 0) > 0 and task.assigned_to == "coder_worker_9b":
+                assigned_worker_key = "coder_worker_9b"
+            else:
+                routing_decision = self.router.route_task(task)
+                assigned_worker_key = routing_decision["assigned_to"]
+                task.assigned_to = assigned_worker_key
 
             worker = workers.get(assigned_worker_key, workers["coder_worker_9b"])
 

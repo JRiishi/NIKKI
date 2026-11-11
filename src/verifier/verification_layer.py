@@ -72,25 +72,48 @@ class VerificationLayer:
                 )
             test_output = f"Test suite output: {test_res.output}"
 
-        # 2. Inspect git diff for modified code
+        # 2. Inspect git diff and untracked/modified files
         diff_res = self.tools.execute("git_diff")
         diff_text = diff_res.output.get("diff", "") if diff_res.success and diff_res.output else ""
-        if not diff_text:
-            status_res = self.tools.execute("git_status")
-            diff_text = f"Workspace Git Status:\n{status_res.output}"
-            # Scan ALL python files modified/added in the workspace, not just src/
-            import glob as _glob
-            all_py_files = list(Path(".").rglob("*.py"))
-            # Exclude venv, pycache, benchmark internals
-            skip_dirs = {"__pycache__", ".venv", "venv", "benchmarks"}
-            for pf in all_py_files:
-                if any(part in skip_dirs for part in pf.parts):
-                    continue
-                if pf.stat().st_size < 50_000:  # skip very large generated files
-                    try:
-                        diff_text += f"\n\nFile [{pf.as_posix()}]:\n{pf.read_text(encoding='utf-8', errors='ignore')}"
-                    except Exception:
-                        pass
+
+        # Collect changed / created files, prioritizing files referenced in the goal or summary
+        relevant_files = []
+        skip_patterns = {".pyc", ".db", ".log", "__pycache__", ".venv", "venv", "benchmarks"}
+
+        # (a) Files explicitly mentioned in goal or task summary
+        candidates = re.findall(r'[\w\-./\\]+\.[a-zA-Z0-9]+', f"{goal} {task_summary}")
+        for c in candidates:
+            p = Path(c)
+            if p.exists() and p.is_file() and not any(sp in p.parts or c.endswith(sp) for sp in skip_patterns):
+                norm = p.as_posix()
+                if norm not in relevant_files:
+                    relevant_files.append(norm)
+
+        # (b) Files reported as untracked or modified by git status
+        status_res = self.tools.execute("git_status")
+        if status_res.success and isinstance(status_res.output, dict):
+            for fline in status_res.output.get("files", []):
+                parts = fline.strip().split(None, 1)
+                if len(parts) == 2:
+                    clean_path = parts[1].strip('"').strip("'")
+                    p = Path(clean_path)
+                    if p.exists() and p.is_file() and not any(sp in p.parts or clean_path.endswith(sp) for sp in skip_patterns):
+                        norm = p.as_posix()
+                        if norm not in relevant_files:
+                            relevant_files.append(norm)
+
+        # Append contents of relevant modified/created files
+        for fpath in relevant_files:
+            try:
+                p = Path(fpath)
+                if p.stat().st_size < 50_000:
+                    content = p.read_text(encoding="utf-8", errors="ignore")
+                    diff_text += f"\n\n--- File: {fpath} ---\n{content}\n"
+            except Exception:
+                pass
+
+        if not diff_text.strip():
+            diff_text = "No file modifications or diffs detected."
 
         # 3. Cognitive Review with Qwen 9B
         review_prompt = f"""User Objective:
@@ -102,9 +125,9 @@ Task Summary:
 Acceptance Criteria:
 {acceptance_criteria or 'Working solution with clean code.'}
 
-Code Diff:
+Code Diff / Modified Files:
 ```
-{diff_text[:3000]}
+{diff_text[:8000]}
 ```
 
 {test_output}
