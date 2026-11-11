@@ -1,4 +1,5 @@
 import re
+import uuid
 from typing import Dict, Any, List, Optional, Tuple
 from src.service.model_service import LocalModelService
 
@@ -40,7 +41,7 @@ class InteractiveSession:
 
     def __init__(self, model_service: LocalModelService, session_id: Optional[str] = None):
         self.service = model_service
-        self.session_id = session_id or "interactive_session"
+        self.session_id = session_id or f"session_{uuid.uuid4().hex[:8]}"
         self.messages: List[Dict[str, str]] = [
             {"role": "system", "content": SYSTEM_PROMPT}
         ]

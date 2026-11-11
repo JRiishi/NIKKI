@@ -98,7 +98,11 @@ class StateDatabase:
     def create_session(self, session_id: str, goal: str, metadata: Optional[Dict[str, Any]] = None) -> None:
         with self._connection() as conn:
             conn.execute(
-                "INSERT INTO sessions (id, status, goal, metadata) VALUES (?, ?, ?, ?)",
+                """INSERT INTO sessions (id, status, goal, metadata) VALUES (?, ?, ?, ?)
+                   ON CONFLICT(id) DO UPDATE SET
+                       goal = excluded.goal,
+                       status = 'ACTIVE',
+                       metadata = excluded.metadata""",
                 (session_id, "ACTIVE", goal, json.dumps(metadata or {}))
             )
 
