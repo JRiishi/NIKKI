@@ -94,6 +94,25 @@ class LocalModelService:
             context_length=context_length
         )
 
+    def chat(
+        self,
+        model_key: str,
+        messages: List[Dict[str, str]],
+        temperature: Optional[float] = None,
+        context_length: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """
+        Dispatch multi-turn chat to conversational LLM (Qwen).
+        """
+        adapter = self.get_adapter(model_key)
+        if not isinstance(adapter, OllamaAdapter):
+            raise TypeError(f"Model '{model_key}' does not support conversational chat.")
+        return adapter.chat(
+            messages=messages,
+            temperature=temperature,
+            context_length=context_length
+        )
+
     def decide(
         self,
         state: Union[str, Dict[str, Any], List[Any]],

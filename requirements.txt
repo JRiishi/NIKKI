@@ -25,3 +25,4 @@ rich>=13.7.0
 
 # --- Optional Testing & Development ---
 pytest>=8.0.0
+

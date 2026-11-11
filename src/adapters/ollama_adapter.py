@@ -1,9 +1,55 @@
+import os
+import sys
 import time
 import json
+import subprocess
 import urllib.request
 import urllib.error
 from typing import Dict, Any, Optional, List
 from src.adapters.base import BaseModelAdapter
+
+def ensure_ollama_running(host: str = "http://127.0.0.1:11434", model_dir: Optional[str] = None, max_wait_s: int = 10) -> bool:
+    """
+    Check if local Ollama daemon is responsive; if not, attempt to start it automatically.
+    """
+    clean_host = host.rstrip("/")
+    try:
+        req = urllib.request.Request(f"{clean_host}/api/tags")
+        with urllib.request.urlopen(req, timeout=2) as resp:
+            if resp.status == 200:
+                return True
+    except Exception:
+        pass
+
+    target_model_dir = model_dir or os.environ.get("OLLAMA_MODELS", "D:\\AI_Models\\Ollama")
+    try:
+        env = os.environ.copy()
+        env["OLLAMA_MODELS"] = str(target_model_dir)
+        creationflags = 0
+        if sys.platform == "win32":
+            creationflags = subprocess.CREATE_NEW_PROCESS_GROUP | 0x00000008  # DETACHED_PROCESS
+
+        subprocess.Popen(
+            ["ollama", "serve"],
+            env=env,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            creationflags=creationflags
+        )
+
+        t_start = time.time()
+        while time.time() - t_start < max_wait_s:
+            time.sleep(1)
+            try:
+                req = urllib.request.Request(f"{clean_host}/api/tags")
+                with urllib.request.urlopen(req, timeout=2) as resp:
+                    if resp.status == 200:
+                        return True
+            except Exception:
+                pass
+    except Exception:
+        pass
+    return False
 
 class OllamaAdapter(BaseModelAdapter):
     """
@@ -36,7 +82,14 @@ class OllamaAdapter(BaseModelAdapter):
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 return json.loads(resp.read().decode("utf-8"))
         except urllib.error.URLError as e:
-            raise ConnectionError(f"Failed to connect to Ollama at {url}: {e}")
+            # Auto-recovery: try to start Ollama if stopped
+            if ensure_ollama_running(self.host):
+                try:
+                    with urllib.request.urlopen(req, timeout=timeout) as resp:
+                        return json.loads(resp.read().decode("utf-8"))
+                except Exception:
+                    pass
+            raise ConnectionError(f"Failed to connect to Ollama at {url}: {e}. Ensure Ollama is running ('ollama serve').")
 
     def _get(self, endpoint: str, timeout: int = 10) -> Dict[str, Any]:
         url = f"{self.host}{endpoint}"
@@ -45,7 +98,13 @@ class OllamaAdapter(BaseModelAdapter):
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 return json.loads(resp.read().decode("utf-8"))
         except urllib.error.URLError as e:
-            raise ConnectionError(f"Failed to connect to Ollama at {url}: {e}")
+            if ensure_ollama_running(self.host):
+                try:
+                    with urllib.request.urlopen(req, timeout=timeout) as resp:
+                        return json.loads(resp.read().decode("utf-8"))
+                except Exception:
+                    pass
+            raise ConnectionError(f"Failed to connect to Ollama at {url}: {e}. Ensure Ollama is running ('ollama serve').")
 
     def load(self, keep_alive: str = "30m") -> None:
         """
